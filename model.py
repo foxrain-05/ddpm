@@ -15,7 +15,6 @@ class DiffusionModel(nn.Module):
         self.betas = torch.linspace(beta_small, beta_large, t_range)
         self.alphas = 1. - self.betas
         self.alphas_bar = torch.cumprod(self.alphas, dim=0)
-        self.alphas_bar_prev = torch.cat([torch.ones(1, ), self.alphas_bar[:-1]], dim=0)
 
         self.inc = DoubleConv(img_depth, 64)
         self.down1 = Down(64, 128)
@@ -65,9 +64,7 @@ class DiffusionModel(nn.Module):
 
         e_hat = self.forward(noise_imgs, ts[:, None].type(torch.float))
 
-        loss = F.mse_loss(
-            e_hat.view(e_hat.shape[0], -1), epsilon.view(epsilon.shape[0], -1)
-            )
+        loss = F.mse_loss(e_hat.view(e_hat.shape[0], -1), epsilon.view(epsilon.shape[0], -1))
 
         return loss
     
