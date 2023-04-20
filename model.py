@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
 from modules import *
 
 class DiffusionModel(nn.Module):
@@ -27,13 +26,6 @@ class DiffusionModel(nn.Module):
         self.sa1 = SAWrapper(256, 8)
         self.sa2 = SAWrapper(256, 4)
         self.sa3 = SAWrapper(128, 8)
-    
-    def pos_encoding(self, t, channels, embed_size):
-        inv_freq = 1.0 / (10000 ** (torch.arange(0, channels, 2).float() / channels))
-        pos_enc_a = torch.sin(t.repeat(1, channels // 2) * inv_freq)
-        pos_enc_b = torch.cos(t.repeat(1, channels // 2) * inv_freq)
-        pos_enc = torch.cat([pos_enc_a, pos_enc_b], dim=-1)
-        return pos_enc.view(-1, channels, 1, 1).repeat(1, 1, embed_size, embed_size)
     
     def forward(self, x, t):
         x1 = self.inc(x)

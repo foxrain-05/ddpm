@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import math
 
 class SelfAttention(nn.Module):
     def __init__(self, h_size):
@@ -99,5 +99,24 @@ class OutConv(nn.Module):
 
     def forward(self, x):
         return self.conv(x)
+
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, device=torch.device('cpu')):
+        super().__init__()
+        assert d_model % 2 == 0, f"d_model must be even, but get {d_model}"
+
+        self.d_model = d_model
+        self.device = device
+
+        emb = torch.arange(0, self.d_model, 2, device=self.device).float() / self.d_model * math.log(10000)
+        self.emb = torch.exp(-emb)
     
+    def forward(self, t):
+        pos_enc = t.repeat(1, self.d_model // 2) * self.emb
+        pos_enc = torch.cat([torch.sin(pos_enc), torch.cos(pos_enc)], dim=-1)
+        pos_enc = pos_enc[:, :, None, None]
+
+        return pos_enc
+
 
