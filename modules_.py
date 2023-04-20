@@ -7,7 +7,7 @@ class InConv(nn.Module):
     def __init__(self, out_channels):
         super(InConv, self).__init__()
         self.conv = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=out_channels, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=3, out_channels=out_channels, kernel_size=3, stride=1, padding=1),
             nn.GELU(),
         )
 
@@ -76,22 +76,3 @@ class OutConv(nn.Module):
 
 if __name__ == '__main__':
     x = torch.randn(1, 1, 64, 64)
-    model = InConv(64)
-    y = model(x)
-    print(y.shape)
-
-    model = ConvBlock(64, 64)
-    y = model(x)
-    print(y.shape)
-
-    model = Down(64, 128)
-    y = model(x)
-    print(y.shape)
-
-    model = Up(128, 64)
-    y = model(y)
-    print(y.shape)
-
-    model = OutConv(64, 1)
-    y = model(y)
-    print(y.shape)
