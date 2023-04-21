@@ -13,7 +13,7 @@ class DataSet(Dataset):
         
         self.data = CIFAR10(root="data", train=True, transform=self.transform)
         self.data = torch.Tensor(self.data.data)
-        self.data = ((self.data / 255.0) * 2.0) - 1.0
+        self.data = self.data / 255.0
         self.data = self.data.moveaxis(3, 1)
 
     def __len__(self):
@@ -47,4 +47,5 @@ if __name__ == "__main__":
 
     for i, x in enumerate(dataloader):
         print(x.shape)
+        
         break
