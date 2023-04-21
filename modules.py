@@ -75,21 +75,13 @@ class Down(nn.Module):
 class Up(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
+        self.conv = DoubleConv(in_channels, out_channels)
 
-        self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
-        self.conv = DoubleConv(in_channels, in_channels, residual=True)
-        self.conv2 = DoubleConv(in_channels, out_channels, in_channels // 2)
-
-    def forward(self, x1, x2):
-        x1 = self.up(x1)
-        diffY = x2.size()[2] - x1.size()[2]
-        diffX = x2.size()[3] - x1.size()[3]
-
-        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
-        x = torch.cat([x2, x1], dim=1)
+    def forward(self, x):
+        x = F.interpolate(x, scale_factor=2, mode='bilinear')
         x = self.conv(x)
-        x = self.conv2(x)
         return x
+    
 
 
 class OutConv(nn.Module):
@@ -121,9 +113,9 @@ class PositionalEncoding(nn.Module):
     
     
 
+# test up layer
 if __name__ == "__main__":
-    pe = PositionalEncoding(32)
-    x = torch.randn(12, 1)
-    x = pe(x)
-    print(x.shape)
-
+    x = torch.randn(1, 3, 256, 256)
+    up = Up(3, 12)
+    y = up(x)
+    print(y.shape)

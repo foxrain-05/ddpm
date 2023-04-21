@@ -2,28 +2,27 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model import DiffusionModel
-from data import DiffSet
+from model_ import DiffusionModel
+from data import DataSet
 from torch.utils.data import DataLoader
 import cv2
 
-batch_size = 128
+batch_size = 16
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 if __name__ == "__main__":
-    dataset = DiffSet(train=True, dataset="MNIST")
+    dataset = DataSet()
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     model = DiffusionModel().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-
-    loss = model.loss_fn
 
     for epoch in range(10):
         model.train()
         for i, x in enumerate(dataloader):
             x = x.to(device)
             optimizer.zero_grad()
+            print(x.shape)
 
             loss = model.loss_fn(x)
             loss.backward()
