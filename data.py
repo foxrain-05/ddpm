@@ -23,21 +23,21 @@ class DataSet(Dataset):
         return self.data[item]
     
 
-class ImageSet(Dataset):
-    def __init__(self):
-        self.data = glob("np_images/*.npy")
+# class ImageSet(Dataset):
+#     def __init__(self):
+#         self.data = glob("np_images/*.npy")
 
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
+#         self.transform = transforms.Compose([
+#             transforms.ToTensor(),
+#         ])
 
-    def __getitem__(self, item):
-        image = np.load(self.data[item])
-        image = self.transform(image)
-        return image
+#     def __getitem__(self, item):
+#         image = np.load(self.data[item])
+#         image = self.transform(image)
+#         return image
 
-    def __len__(self):
-        return len(self.data)
+#     def __len__(self):
+#         return len(self.data)
 
 
 

@@ -9,13 +9,14 @@ class DiffusionModel(nn.Module):
     def __init__(self, t_range=1000, beta_small=1e-4, beta_large=0.02):
         super().__init__()
 
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.t_range = t_range
         self.beta_small = beta_small
         self.beta_large = beta_large
 
-        self.betas = torch.linspace(beta_small, beta_large, t_range)
+        self.betas = torch.linspace(beta_small, beta_large, t_range).to(self.device)
         self.alphas = 1. - self.betas
-        self.alphas_bar = torch.cumprod(self.alphas, dim=0)
+        self.alphas_bar = torch.cumprod(self.alphas, dim=0, dtype=torch.float32).to(self.device)
 
         self.inc = DoubleConv(3, 64)
         self.outc = OutConv(64, 3)
@@ -56,11 +57,13 @@ class DiffusionModel(nn.Module):
         return x
 
     def loss_fn(self, x_0):
-        ts = torch.randint(0, self.t_range, size=(x_0.shape[0],), dtype=torch.int64)
-        eposilon = torch.randn_like(x_0, dtype=torch.float32)
+        x_0 = x_0.to(self.device)
+        ts = torch.randint(0, self.t_range, size=(x_0.shape[0],), dtype=torch.int64, device=self.device)
+        eposilon = torch.randn_like(x_0, dtype=torch.float32, device=self.device)
         
         alpha_t_bar = torch.gather(self.alphas_bar, 0, ts)
         x_t = torch.sqrt(alpha_t_bar)[:, None, None, None] * x_0 + torch.sqrt(1 - alpha_t_bar)[:, None, None, None] * eposilon
+
         e_hat = self.forward(x_t, ts[:, None].type(torch.float))
 
         loss = F.mse_loss(e_hat.reshape(e_hat.shape[0], -1), eposilon.reshape(eposilon.shape[0], -1))
@@ -69,7 +72,7 @@ class DiffusionModel(nn.Module):
     
     def sample(self, x, t):
         z = torch.randn_like(x, dtype=torch.float32) if t > 1 else 0
-
+        
         e_hat = self.forward(x, t.view(1, 1).repeat(x.shape[0], 1))
         pre_scale = 1 / torch.sqrt(self.alphas_bar[t])
         e_scale = (1 - self.alphas[t]) / torch.sqrt(1 - self.alphas_bar[t])
@@ -81,13 +84,14 @@ class DiffusionModel(nn.Module):
 if __name__ == "__main__":
     data = DataSet()
     DataLoader = DataLoader(data, batch_size=4, shuffle=True)
-    model = DiffusionModel()
+    model = DiffusionModel().to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
     for i, x in enumerate(DataLoader):
-        
-        loss = model.loss_fn(x)
-        print(loss)
+        x = x.to(model.device)
+        t = torch.asarray([[999], [999], [999], [999]])
+        print(t.shape)
+        loss = model(x, t)
 
         break
 

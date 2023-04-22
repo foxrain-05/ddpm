@@ -6,3 +6,4 @@ np_images/*.npy
 vae/*.pth
 images/*.jpg
 show_image/*.jpg
+out/*.png
