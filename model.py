@@ -1,5 +1,4 @@
 import torch
-
 from data import DataSet
 from torch.utils.data import DataLoader
 from modules import *
@@ -18,8 +17,8 @@ class DiffusionModel(nn.Module):
         self.alphas = 1. - self.betas
         self.alphas_bar = torch.cumprod(self.alphas, dim=0, dtype=torch.float32).to(self.device)
 
-        self.inc = DoubleConv(3, 64)
-        self.outc = OutConv(64, 3)
+        self.inc = DoubleConv(1, 64)
+        self.outc = OutConv(64, 1)
 
         self.donw1 = Down(64, 128)
         self.donw2 = Down(128, 256)
