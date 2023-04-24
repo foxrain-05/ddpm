@@ -1,17 +1,20 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-from model_ import DiffusionModel
-from data import DataSet
+from torchvision.datasets import MNIST
+from model import DiffusionModel
 from torch.utils.data import DataLoader
+from torchvision import transforms
 import cv2
 
 batch_size = 128
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 if __name__ == "__main__":
-    dataset = DataSet()
+    transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Pad(2),
+    ])
+
+    dataset = MNIST(root="data", train=True, download=True, transform=transform)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     model = DiffusionModel().to(device)
@@ -20,7 +23,7 @@ if __name__ == "__main__":
     for epoch in range(1000):
         model.eval()
         with torch.no_grad():
-            x = torch.randn(5, 3, 32, 32).to(device)
+            x = torch.randn(5, 1, 32, 32).to(device)
             ts = torch.arange(model.t_range -1, 0, -1).to(device)
 
             for t in ts:
@@ -33,7 +36,7 @@ if __name__ == "__main__":
                 
 
         model.train()
-        for i, x in enumerate(dataloader):
+        for i, (x, _) in enumerate(dataloader):
             x = x.to(device)
             optimizer.zero_grad()
 

@@ -1,5 +1,4 @@
 import torch
-
 from data import DataSet
 from torch.utils.data import DataLoader
 from modules import *
@@ -18,8 +17,8 @@ class DiffusionModel(nn.Module):
         self.alphas = 1. - self.betas
         self.alphas_bar = torch.cumprod(self.alphas, dim=0, dtype=torch.float32).to(self.device)
 
-        self.inc = DoubleConv(3, 64)
-        self.outc = OutConv(64, 3)
+        self.inc = DoubleConv(1, 64)
+        self.outc = OutConv(64, 1)
 
         self.donw1 = Down(64, 128)
         self.donw2 = Down(128, 256)
@@ -72,9 +71,9 @@ class DiffusionModel(nn.Module):
     
     def sample(self, x, t):
         z = torch.randn_like(x, dtype=torch.float32) if t > 1 else 0
-
+        
         e_hat = self.forward(x, t.view(1, 1).repeat(x.shape[0], 1))
-        pre_scale = 1 / torch.sqrt(self.alphas[t])
+        pre_scale = 1 / torch.sqrt(self.alphas_bar[t])
         e_scale = (1 - self.alphas[t]) / torch.sqrt(1 - self.alphas_bar[t])
         post_sigma = torch.sqrt(self.betas[t]) * z
         x = pre_scale * (x - e_scale * e_hat) + post_sigma
@@ -94,5 +93,4 @@ if __name__ == "__main__":
         loss = model(x, t)
 
         break
-
 
