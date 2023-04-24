@@ -29,9 +29,12 @@ if __name__ == "__main__":
             for t in ts:
                 x = model.sample(x, t)
             
-            x = x.permute(0, 2, 3, 1).cpu().numpy() * 255.0
-            
-            x = cv2.cvtColor(x[1], cv2.COLOR_RGB2BGR)
+            x = x[0].cpu() * 255.0
+            x = torch.cat([x, x, x], dim=0)
+            x = x.permute(1, 2, 0).numpy()
+
+            print(x.shape)
+            print(x[0][0])
             cv2.imwrite(f"out/sample{epoch}.jpg", x)
                 
 
