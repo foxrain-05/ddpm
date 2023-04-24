@@ -13,14 +13,14 @@ if __name__ == "__main__":
             transforms.ToTensor(),
             transforms.Pad(2),
     ])
-
+    
     dataset = MNIST(root="data", train=True, download=True, transform=transform)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     model = DiffusionModel().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-    for epoch in range(1000):
+    for epoch in range(100):
         model.eval()
         with torch.no_grad():
             x = torch.randn(5, 1, 32, 32).to(device)
@@ -32,11 +32,8 @@ if __name__ == "__main__":
             x = x[0].cpu() * 255.0
             x = torch.cat([x, x, x], dim=0)
             x = x.permute(1, 2, 0).numpy()
-
-            print(x.shape)
-            print(x[0][0])
             cv2.imwrite(f"out/sample{epoch}.jpg", x)
-                
+
 
         model.train()
         for i, (x, _) in enumerate(dataloader):
