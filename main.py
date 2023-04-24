@@ -17,7 +17,7 @@ if __name__ == "__main__":
     model = DiffusionModel().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-    for epoch in range(100):
+    for epoch in range(1000):
         model.eval()
         with torch.no_grad():
             x = torch.randn(5, 3, 32, 32).to(device)
@@ -26,9 +26,10 @@ if __name__ == "__main__":
             for t in ts:
                 x = model.sample(x, t)
             
-            x = x.permute(0, 2, 3, 1).cpu().numpy() * 255
-
-            cv2.imwrite(f"out/sample{epoch}.png", x[1])
+            x = x.permute(0, 2, 3, 1).cpu().numpy() * 255.0
+            
+            x = cv2.cvtColor(x[1], cv2.COLOR_RGB2BGR)
+            cv2.imwrite(f"out/sample{epoch}.jpg", x)
                 
 
         model.train()
