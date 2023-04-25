@@ -8,3 +8,11 @@
 * torchvision
 * opencv-python
 
+## 사용법
+```bash
+python main.py
+```
+
+## 결과
+![image](./images.jpg "result")
+
