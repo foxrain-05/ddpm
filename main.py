@@ -24,8 +24,9 @@ for epoch in range(100):
             x = model.sample(x, t)
         
         x = x.permute(0, 2, 3, 1).clamp(0, 1).detach().cpu().numpy() * 255.0
-
-        cv2.imwrite(f"out/sample{epoch}.jpg", x[0])
+        
+        x = cv2.cvtColor(x[0].astype("uint8"), cv2.COLOR_RGB2BGR)
+        cv2.imwrite(f"out/sample{epoch}.jpg", x)
 
 
     model.train()
