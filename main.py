@@ -22,9 +22,8 @@ for epoch in range(100):
 
         for t in ts:
             x = model.sample(x, t)
-            print(x)
         
-        x = x.permute(0, 2, 3, 1).clamp(0, 1).detach().cpu().numpy() * 255
+        x = x.permute(0, 2, 3, 1).clamp(0, 1).detach().cpu().numpy() * 255.0
 
         cv2.imwrite(f"out/sample{epoch}.jpg", x[0])
 

@@ -73,7 +73,7 @@ class DiffusionModel(nn.Module):
         z = torch.randn_like(x, dtype=torch.float32) if t > 1 else 0
         
         e_hat = self.forward(x, t.view(1, 1).repeat(x.shape[0], 1))
-        pre_scale = 1 / torch.sqrt(self.alphas_bar[t])
+        pre_scale = 1 / torch.sqrt(self.alphas[t])
         e_scale = (1 - self.alphas[t]) / torch.sqrt(1 - self.alphas_bar[t])
         post_sigma = torch.sqrt(self.betas[t]) * z
         x = pre_scale * (x - e_scale * e_hat) + post_sigma
@@ -87,10 +87,8 @@ if __name__ == "__main__":
 
 
     for i, x in enumerate(DataLoader):
-        x = x.to(model.device)
-        t = torch.asarray([[999], [999], [999], [999]])
-        print(t.shape)
-        loss = model(x, t)
-
+        x = x.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        x = model(x, torch.randint(0, 1000, size=(4, 1)).type(torch.float))
+        print(x.shape)
         break
 
