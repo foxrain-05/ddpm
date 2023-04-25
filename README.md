@@ -14,5 +14,5 @@ python main.py
 ```
 
 ## 결과
-![image](./images.jpg "result"){: width="80%" height="80%"}
+![image](./images.jpg "result")
 
