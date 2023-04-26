@@ -2,8 +2,6 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.datasets import CIFAR10, MNIST
 from torchvision import transforms
-from glob import glob
-import numpy as np
 
 class DataSet(Dataset):
     def __init__(self):
@@ -28,5 +26,4 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=128, shuffle=True)
 
     for i, x in enumerate(dataloader):
-        
         break
