@@ -56,6 +56,10 @@ class DiffusionModel(nn.Module):
         return x
 
     def loss_fn(self, x_0):
+        """
+        Corresponds to Algorithm 1 from (Ho et al., 2020).
+        """
+
         x_0 = x_0.to(self.device)
         ts = torch.randint(0, self.t_range, size=(x_0.shape[0],), dtype=torch.int64, device=self.device)
         eposilon = torch.randn_like(x_0, dtype=torch.float32, device=self.device)
@@ -70,6 +74,9 @@ class DiffusionModel(nn.Module):
         return loss
     
     def sample(self, x, t):
+        """
+        Corresponds to the inner loop of Algorithm 2 from (Ho et al., 2020).
+        """
         z = torch.randn_like(x, dtype=torch.float32) if t > 1 else 0
         
         e_hat = self.forward(x, t.view(1, 1).repeat(x.shape[0], 1))
