@@ -86,16 +86,3 @@ class DiffusionModel(nn.Module):
         x = pre_scale * (x - e_scale * e_hat) + post_sigma
 
         return x
-
-if __name__ == "__main__":
-    data = DataSet()
-    DataLoader = DataLoader(data, batch_size=4, shuffle=True)
-    model = DiffusionModel().to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-
-
-    for i, x in enumerate(DataLoader):
-        x = x.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-        x = model(x, torch.randint(0, 1000, size=(4, 1)).type(torch.float))
-        print(x.shape)
-        break
-

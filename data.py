@@ -20,10 +20,3 @@ class DataSet(Dataset):
     def __getitem__(self, item):
         return self.data[item]
     
-
-if __name__ == "__main__":
-    dataset = DataSet()
-    dataloader = DataLoader(dataset, batch_size=128, shuffle=True)
-
-    for i, x in enumerate(dataloader):
-        break

@@ -111,10 +111,3 @@ class PositionalEncoding(nn.Module):
 
         return pos_enc
     
-
-# test up layer
-if __name__ == "__main__":
-    x = torch.randn(1, 3, 256, 256)
-    up = Up(3, 12)
-    y = up(x)
-    print(y.shape)
