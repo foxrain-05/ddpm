@@ -7,3 +7,4 @@ vae/*.pth
 images/*.jpg
 show_image/*.jpg
 out/*.jpg
+checkpoints/*.pth

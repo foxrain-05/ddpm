@@ -99,15 +99,12 @@ class PositionalEncoding(nn.Module):
         assert d_model % 2 == 0, f"d_model must be even, but get {d_model}"
 
         self.d_model = d_model
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        emb = torch.arange(0, d_model, 2).float() / d_model * math.log(10000)
+        self.register_buffer("emb", torch.exp(-emb))
     
     def forward(self, t):
-        self.emb = torch.arange(0, self.d_model, 2, device=self.device).float() / self.d_model * math.log(10000)
-        self.emb = torch.exp(-self.emb)
-
-        pos_enc = t.repeat(1, self.d_model // 2).to(self.device) * self.emb
+        pos_enc = t.repeat(1, self.d_model // 2).to(self.emb.device) * self.emb
         pos_enc = torch.cat([torch.sin(pos_enc), torch.cos(pos_enc)], dim=-1)
         pos_enc = pos_enc[:, :, None, None]
 
         return pos_enc
-    

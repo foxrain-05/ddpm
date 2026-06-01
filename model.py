@@ -1,6 +1,4 @@
 import torch
-from data import DataSet
-from torch.utils.data import DataLoader
 from modules import *
 
 
@@ -13,16 +11,19 @@ class DiffusionModel(nn.Module):
         self.beta_small = beta_small
         self.beta_large = beta_large
 
-        self.betas = torch.linspace(beta_small, beta_large, t_range).to(self.device)
-        self.alphas = 1. - self.betas
-        self.alphas_bar = torch.cumprod(self.alphas, dim=0, dtype=torch.float32).to(self.device)
+        betas = torch.linspace(beta_small, beta_large, t_range)
+        alphas = 1.0 - betas
+        alphas_bar = torch.cumprod(alphas, dim=0, dtype=torch.float32)
+        self.register_buffer("betas", betas)
+        self.register_buffer("alphas", alphas)
+        self.register_buffer("alphas_bar", alphas_bar)
 
         self.inc = DoubleConv(3, 64)
         self.outc = OutConv(64, 3)
 
-        self.donw1 = Down(64, 128)
-        self.donw2 = Down(128, 256)
-        self.donw3 = Down(256, 512)
+        self.down1 = Down(64, 128)
+        self.down2 = Down(128, 256)
+        self.down3 = Down(256, 512)
 
         self.up1 = Up(512, 256)
         self.up2 = Up(256, 128)
@@ -41,10 +42,10 @@ class DiffusionModel(nn.Module):
     
     def forward(self, x, t):
         x1 = self.inc(x) # x1 shape [batch, 64, 32, 32]
-        x2 = self.donw1(x1) + self.pe1(t) # x2 shape [batch, 128, 16, 16]
-        x3 = self.donw2(x2) + self.pe2(t) # x3 shape [batch, 256, 8, 8]
+        x2 = self.down1(x1) + self.pe1(t) # x2 shape [batch, 128, 16, 16]
+        x3 = self.down2(x2) + self.pe2(t) # x3 shape [batch, 256, 8, 8]
         x3 = self.sa1(x3)
-        x4 = self.donw3(x3) + self.pe3(t) # x4 shape [batch, 512, 4, 4]
+        x4 = self.down3(x3) + self.pe3(t) # x4 shape [batch, 512, 4, 4]
         x4 = self.sa2(x4)
         
         x = self.up1(x4) + x3 + self.pe4(t) # x shape [batch, 256, 8, 8]
@@ -62,14 +63,14 @@ class DiffusionModel(nn.Module):
 
         x_0 = x_0.to(self.device)
         ts = torch.randint(0, self.t_range, size=(x_0.shape[0],), dtype=torch.int64, device=self.device)
-        eposilon = torch.randn_like(x_0, dtype=torch.float32, device=self.device)
+        epsilon = torch.randn_like(x_0, dtype=torch.float32, device=self.device)
         
         alpha_t_bar = torch.gather(self.alphas_bar, 0, ts)
-        x_t = torch.sqrt(alpha_t_bar)[:, None, None, None] * x_0 + torch.sqrt(1 - alpha_t_bar)[:, None, None, None] * eposilon
+        x_t = torch.sqrt(alpha_t_bar)[:, None, None, None] * x_0 + torch.sqrt(1 - alpha_t_bar)[:, None, None, None] * epsilon
 
         e_hat = self.forward(x_t, ts[:, None].type(torch.float))
 
-        loss = F.mse_loss(e_hat.reshape(e_hat.shape[0], -1), eposilon.reshape(eposilon.shape[0], -1))
+        loss = F.mse_loss(e_hat.reshape(e_hat.shape[0], -1), epsilon.reshape(epsilon.shape[0], -1))
 
         return loss
     
